@@ -1,0 +1,30 @@
+# IntelliJ IDEA
+.idea/
+**/.idea/
+*.iml
+.run/
+
+# Java and Maven
+**/target/
+*.class
+*.jar
+*.war
+
+# React and Node
+**/node_modules/
+**/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets
+.env
+.env.*
+!.env.example
+application-local.properties
+
+# Logs and OS files
+*.log
+logs/
+.DS_Store
+Thumbs.db
