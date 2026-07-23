@@ -7,6 +7,13 @@ import {
     getAllEmployees
 } from './services/employeeService'
 
+type SortOption =
+    | 'name-asc'
+    | 'name-desc'
+    | 'department-asc'
+    | 'salary-asc'
+    | 'salary-desc'
+
 function App() {
     const [employees, setEmployees] = useState<Employee[]>([])
 
@@ -16,6 +23,9 @@ function App() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+
+    const [sortOption, setSortOption] =
+        useState<SortOption>('name-asc')
 
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
@@ -32,6 +42,34 @@ function App() {
 
         return searchableEmployee.includes(normalizedSearch)
     })
+
+    const sortedEmployees = [...filteredEmployees].sort(
+        (firstEmployee, secondEmployee) => {
+            switch (sortOption) {
+                case 'name-desc':
+                    return secondEmployee.firstName.localeCompare(
+                        firstEmployee.firstName
+                    )
+
+                case 'department-asc':
+                    return firstEmployee.department.localeCompare(
+                        secondEmployee.department
+                    )
+
+                case 'salary-asc':
+                    return firstEmployee.salary - secondEmployee.salary
+
+                case 'salary-desc':
+                    return secondEmployee.salary - firstEmployee.salary
+
+                case 'name-asc':
+                default:
+                    return firstEmployee.firstName.localeCompare(
+                        secondEmployee.firstName
+                    )
+            }
+        }
+    )
 
     useEffect(() => {
         async function loadEmployees() {
@@ -127,15 +165,47 @@ function App() {
                     <div className="employee-section-header">
                         <h2>Employees</h2>
 
-                        <input
-                            className="search-input"
-                            type="search"
-                            placeholder="Search employees..."
-                            value={searchTerm}
-                            onChange={(event) =>
-                                setSearchTerm(event.target.value)
-                            }
-                        />
+                        <div className="list-controls">
+                            <input
+                                className="search-input"
+                                type="search"
+                                placeholder="Search employees..."
+                                value={searchTerm}
+                                onChange={(event) =>
+                                    setSearchTerm(event.target.value)
+                                }
+                            />
+
+                            <select
+                                className="sort-select"
+                                value={sortOption}
+                                onChange={(event) =>
+                                    setSortOption(
+                                        event.target.value as SortOption
+                                    )
+                                }
+                            >
+                                <option value="name-asc">
+                                    Name: A–Z
+                                </option>
+
+                                <option value="name-desc">
+                                    Name: Z–A
+                                </option>
+
+                                <option value="department-asc">
+                                    Department: A–Z
+                                </option>
+
+                                <option value="salary-asc">
+                                    Salary: Low to High
+                                </option>
+
+                                <option value="salary-desc">
+                                    Salary: High to Low
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
                     {loading && <p>Loading employees...</p>}
@@ -157,7 +227,7 @@ function App() {
 
                     {!loading &&
                         !error &&
-                        filteredEmployees.length > 0 && (
+                        sortedEmployees.length > 0 && (
                             <div className="table-container">
                                 <table className="employee-table">
                                     <thead>
@@ -172,7 +242,7 @@ function App() {
                                     </thead>
 
                                     <tbody>
-                                    {filteredEmployees.map((employee) => (
+                                    {sortedEmployees.map((employee) => (
                                         <tr key={employee.id}>
                                             <td>
                                                 {employee.firstName}{' '}

@@ -110,6 +110,11 @@
   gap: 20px;
 }
 
+.list-controls {
+  display: flex;
+  gap: 12px;
+}
+
 .search-input {
   width: 320px;
   max-width: 100%;
@@ -120,6 +125,20 @@
 }
 
 .search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 15%);
+}
+
+.sort-select {
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: white;
+  outline: none;
+  cursor: pointer;
+}
+
+.sort-select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgb(37 99 235 / 15%);
 }
@@ -200,7 +219,12 @@
     flex-direction: column;
   }
 
-  .search-input {
+  .list-controls {
+    flex-direction: column;
+  }
+
+  .search-input,
+  .sort-select {
     width: 100%;
   }
 }
