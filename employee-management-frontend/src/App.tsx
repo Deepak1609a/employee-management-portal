@@ -15,6 +15,23 @@ function App() {
 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+
+    const filteredEmployees = employees.filter((employee) => {
+        const searchableEmployee = [
+            employee.firstName,
+            employee.lastName,
+            employee.email,
+            employee.department,
+            employee.jobTitle
+        ]
+            .join(' ')
+            .toLowerCase()
+
+        return searchableEmployee.includes(normalizedSearch)
+    })
 
     useEffect(() => {
         async function loadEmployees() {
@@ -107,7 +124,19 @@ function App() {
                 />
 
                 <section className="employee-section">
-                    <h2>Employees</h2>
+                    <div className="employee-section-header">
+                        <h2>Employees</h2>
+
+                        <input
+                            className="search-input"
+                            type="search"
+                            placeholder="Search employees..."
+                            value={searchTerm}
+                            onChange={(event) =>
+                                setSearchTerm(event.target.value)
+                            }
+                        />
+                    </div>
 
                     {loading && <p>Loading employees...</p>}
 
@@ -119,65 +148,76 @@ function App() {
                         <p>No employees found.</p>
                     )}
 
-                    {!loading && employees.length > 0 && (
-                        <div className="table-container">
-                            <table className="employee-table">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Department</th>
-                                    <th>Job Title</th>
-                                    <th>Salary</th>
-                                    <th>Actions</th>
-                                </tr>
-                                </thead>
+                    {!loading &&
+                        !error &&
+                        employees.length > 0 &&
+                        filteredEmployees.length === 0 && (
+                            <p>No employees match your search.</p>
+                        )}
 
-                                <tbody>
-                                {employees.map((employee) => (
-                                    <tr key={employee.id}>
-                                        <td>
-                                            {employee.firstName}{' '}
-                                            {employee.lastName}
-                                        </td>
-
-                                        <td>{employee.email}</td>
-
-                                        <td>{employee.department}</td>
-
-                                        <td>{employee.jobTitle}</td>
-
-                                        <td>
-                                            ${employee.salary.toLocaleString()}
-                                        </td>
-
-                                        <td>
-                                            <div className="table-actions">
-                                                <button
-                                                    className="edit-button"
-                                                    onClick={() =>
-                                                        handleEditEmployee(employee)
-                                                    }
-                                                >
-                                                    Edit
-                                                </button>
-
-                                                <button
-                                                    className="delete-button"
-                                                    onClick={() =>
-                                                        handleDeleteEmployee(employee.id)
-                                                    }
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                    {!loading &&
+                        !error &&
+                        filteredEmployees.length > 0 && (
+                            <div className="table-container">
+                                <table className="employee-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Department</th>
+                                        <th>Job Title</th>
+                                        <th>Salary</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                                    </thead>
+
+                                    <tbody>
+                                    {filteredEmployees.map((employee) => (
+                                        <tr key={employee.id}>
+                                            <td>
+                                                {employee.firstName}{' '}
+                                                {employee.lastName}
+                                            </td>
+
+                                            <td>{employee.email}</td>
+
+                                            <td>{employee.department}</td>
+
+                                            <td>{employee.jobTitle}</td>
+
+                                            <td>
+                                                ${employee.salary.toLocaleString()}
+                                            </td>
+
+                                            <td>
+                                                <div className="table-actions">
+                                                    <button
+                                                        className="edit-button"
+                                                        onClick={() =>
+                                                            handleEditEmployee(employee)
+                                                        }
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className="delete-button"
+                                                        onClick={() =>
+                                                            handleDeleteEmployee(
+                                                                employee.id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                 </section>
             </main>
         </div>
