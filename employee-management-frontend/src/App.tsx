@@ -14,6 +14,8 @@ type SortOption =
     | 'salary-asc'
     | 'salary-desc'
 
+const EMPLOYEES_PER_PAGE = 5
+
 function App() {
     const [employees, setEmployees] = useState<Employee[]>([])
 
@@ -26,6 +28,8 @@ function App() {
 
     const [sortOption, setSortOption] =
         useState<SortOption>('name-asc')
+
+    const [currentPage, setCurrentPage] = useState(1)
 
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
@@ -71,6 +75,26 @@ function App() {
         }
     )
 
+    const totalPages = Math.max(
+        1,
+        Math.ceil(
+            sortedEmployees.length / EMPLOYEES_PER_PAGE
+        )
+    )
+
+    const activePage = Math.min(currentPage, totalPages)
+
+    const firstEmployeeIndex =
+        (activePage - 1) * EMPLOYEES_PER_PAGE
+
+    const lastEmployeeIndex =
+        firstEmployeeIndex + EMPLOYEES_PER_PAGE
+
+    const paginatedEmployees = sortedEmployees.slice(
+        firstEmployeeIndex,
+        lastEmployeeIndex
+    )
+
     useEffect(() => {
         async function loadEmployees() {
             try {
@@ -104,6 +128,7 @@ function App() {
         })
 
         setEditingEmployee(null)
+        setCurrentPage(1)
         setError('')
     }
 
@@ -171,19 +196,21 @@ function App() {
                                 type="search"
                                 placeholder="Search employees..."
                                 value={searchTerm}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                     setSearchTerm(event.target.value)
-                                }
+                                    setCurrentPage(1)
+                                }}
                             />
 
                             <select
                                 className="sort-select"
                                 value={sortOption}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                     setSortOption(
                                         event.target.value as SortOption
                                     )
-                                }
+                                    setCurrentPage(1)
+                                }}
                             >
                                 <option value="name-asc">
                                     Name: A–Z
@@ -228,65 +255,119 @@ function App() {
                     {!loading &&
                         !error &&
                         sortedEmployees.length > 0 && (
-                            <div className="table-container">
-                                <table className="employee-table">
-                                    <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Department</th>
-                                        <th>Job Title</th>
-                                        <th>Salary</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody>
-                                    {sortedEmployees.map((employee) => (
-                                        <tr key={employee.id}>
-                                            <td>
-                                                {employee.firstName}{' '}
-                                                {employee.lastName}
-                                            </td>
-
-                                            <td>{employee.email}</td>
-
-                                            <td>{employee.department}</td>
-
-                                            <td>{employee.jobTitle}</td>
-
-                                            <td>
-                                                ${employee.salary.toLocaleString()}
-                                            </td>
-
-                                            <td>
-                                                <div className="table-actions">
-                                                    <button
-                                                        className="edit-button"
-                                                        onClick={() =>
-                                                            handleEditEmployee(employee)
-                                                        }
-                                                    >
-                                                        Edit
-                                                    </button>
-
-                                                    <button
-                                                        className="delete-button"
-                                                        onClick={() =>
-                                                            handleDeleteEmployee(
-                                                                employee.id
-                                                            )
-                                                        }
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
+                            <>
+                                <div className="table-container">
+                                    <table className="employee-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Department</th>
+                                            <th>Job Title</th>
+                                            <th>Salary</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+
+                                        <tbody>
+                                        {paginatedEmployees.map((employee) => (
+                                            <tr key={employee.id}>
+                                                <td>
+                                                    {employee.firstName}{' '}
+                                                    {employee.lastName}
+                                                </td>
+
+                                                <td>{employee.email}</td>
+
+                                                <td>{employee.department}</td>
+
+                                                <td>{employee.jobTitle}</td>
+
+                                                <td>
+                                                    ${employee.salary.toLocaleString()}
+                                                </td>
+
+                                                <td>
+                                                    <div className="table-actions">
+                                                        <button
+                                                            className="edit-button"
+                                                            onClick={() =>
+                                                                handleEditEmployee(employee)
+                                                            }
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                        <button
+                                                            className="delete-button"
+                                                            onClick={() =>
+                                                                handleDeleteEmployee(
+                                                                    employee.id
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="pagination">
+                                    <p>
+                                        Showing {firstEmployeeIndex + 1}–
+                                        {Math.min(
+                                            lastEmployeeIndex,
+                                            sortedEmployees.length
+                                        )}{' '}
+                                        of {sortedEmployees.length} employees
+                                    </p>
+
+                                    {totalPages > 1 && (
+                                        <div className="pagination-buttons">
+                                            <button
+                                                onClick={() =>
+                                                    setCurrentPage(activePage - 1)
+                                                }
+                                                disabled={activePage === 1}
+                                            >
+                                                Previous
+                                            </button>
+
+                                            {Array.from(
+                                                { length: totalPages },
+                                                (_, index) => index + 1
+                                            ).map((pageNumber) => (
+                                                <button
+                                                    key={pageNumber}
+                                                    className={
+                                                        pageNumber === activePage
+                                                            ? 'active-page'
+                                                            : ''
+                                                    }
+                                                    onClick={() =>
+                                                        setCurrentPage(pageNumber)
+                                                    }
+                                                >
+                                                    {pageNumber}
+                                                </button>
+                                            ))}
+
+                                            <button
+                                                onClick={() =>
+                                                    setCurrentPage(activePage + 1)
+                                                }
+                                                disabled={activePage === totalPages}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         )}
                 </section>
             </main>
