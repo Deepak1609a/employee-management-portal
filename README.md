@@ -328,6 +328,10 @@ The `.gitignore` excludes:
 - CI/CD pipeline
 - Cloud deployment
 
+## Unit Testing
+
+The backend service layer is tested using JUnit 5 and Mockito. The test suite covers successful CRUD operations, missing employee records, duplicate-email validation, and repository interaction verification.
+
 ## Author
 
 **Deepak Alikatte**
